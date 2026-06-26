@@ -7,9 +7,328 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Phase 1: Minimal initialization.
-// Database schema will be designed and implemented in later phases.
+// -----------------------------------------
+// ENUMS
+// -----------------------------------------
+enum EntityType {
+  YEAR
+  TIMELINE
+  MOVIE
+  TV_SERIES
+  ANIME
+  BOOK
+  ALBUM
+  SONG
+  GAME
+  CONSOLE
+  PERSON
+  COMPANY
+  COUNTRY
+  CITY
+  EVENT
+  AWARD
+  PHONE
+  CAR
+  SOFTWARE
+  OS
+  WEBSITE
+  AI_MODEL
+  SPACE_MISSION
+  BUILDING
+  MUSEUM
+  HOLIDAY
+  FOOD
+  BRAND
+  ORGANIZATION
+  DISEASE
+  SCIENTIFIC_DISCOVERY
+  TECHNOLOGY
+  OTHER
+}
 
-model Placeholder {
-  id Int @id @default(autoincrement())
+enum EntityStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  REVIEW_PENDING
+}
+
+enum RelationType {
+  RELEASED_IN
+  DIRECTED_BY
+  PRODUCED_BY
+  BORN_IN
+  DIED_IN
+  LOCATED_IN
+  PART_OF
+  WINNER_OF
+  MEMBER_OF
+  OCCURS_IN
+  CREATED_BY
+  OWNED_BY
+  COMPATIBLE_WITH
+  RELATED_TO
+  INSPIRED_BY
+  SUCCEEDED_BY
+  PRECEDED_BY
+  STARRING
+  DEVELOPED_BY
+  PUBLISHED_BY
+  OTHER
+}
+
+enum SourceType {
+  WIKIDATA
+  WIKIPEDIA
+  TMDB
+  MUSICBRAINZ
+  OPENLIBRARY
+  IGDB
+  MOBYGAMES
+  NASA
+  WORLD_BANK
+  MANUAL
+  AI
+  OTHER
+}
+
+enum ImportStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  PARTIAL
+}
+
+enum RawRecordStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  SKIPPED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RESOLVED
+}
+
+enum ReviewType {
+  MERGE_CONFLICT
+  LOW_CONFIDENCE
+  NEW_ENTITY
+  AI_ENRICHMENT
+}
+
+enum DatePrecision {
+  EXACT
+  MONTH
+  YEAR
+  DECADE
+  CENTURY
+}
+
+// -----------------------------------------
+// MODELS
+// -----------------------------------------
+
+model Entity {
+  id          String         @id @default(uuid())
+  type        EntityType
+  slug        String         @unique
+  title       String
+  subtitle    String?
+  description String?        @db.Text
+  startDate   DateTime?
+  endDate     DateTime?
+  precision   DatePrecision? @default(EXACT)
+  status      EntityStatus   @default(DRAFT)
+  metadata    Json?
+  seo         Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  aliases           EntityAlias[]
+  outgoingRelations EntityRelation[]  @relation("FromEntity")
+  incomingRelations EntityRelation[]  @relation("ToEntity")
+  categories        EntityCategory[]
+  sourceReferences  SourceReference[]
+
+  @@index([slug])
+  @@index([type])
+  @@index([startDate])
+  @@index([status])
+}
+
+model EntityAlias {
+  id                String           @id @default(uuid())
+  entityId          String
+  entity            Entity           @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  name              String
+  language          String? // e.g., 'en', 'tr'
+  sourceReferenceId String?
+  sourceReference   SourceReference? @relation(fields: [sourceReferenceId], references: [id], onDelete: SetNull)
+
+  @@index([entityId])
+}
+
+model EntityRelation {
+  id           String       @id @default(uuid())
+  fromEntityId String
+  toEntityId   String
+  fromEntity   Entity       @relation("FromEntity", fields: [fromEntityId], references: [id], onDelete: Cascade)
+  toEntity     Entity       @relation("ToEntity", fields: [toEntityId], references: [id], onDelete: Cascade)
+  relationType RelationType
+  startDate    DateTime?
+  endDate      DateTime?
+  confidence   Float? // 0.0 to 100.0
+  metadata     Json?
+
+  sourceReferenceId String?
+  sourceReference   SourceReference? @relation(fields: [sourceReferenceId], references: [id], onDelete: SetNull)
+
+  @@index([fromEntityId])
+  @@index([toEntityId])
+  @@index([relationType])
+}
+
+model Source {
+  id                  String     @id @default(uuid())
+  name                String     @unique
+  type                SourceType
+  baseUrl             String?
+  license             String?
+  trustLevel          Int        @default(50) // 1-100
+  updateFrequency     String?
+  attributionRequired Boolean    @default(false)
+  metadata            Json?
+
+  references    SourceReference[]
+  importBatches ImportBatch[]
+  rawRecords    RawImportRecord[]
+}
+
+model SourceReference {
+  id       String  @id @default(uuid())
+  sourceId String
+  source   Source  @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  entityId String?
+  entity   Entity? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  url          String?
+  externalId   String?
+  retrievedAt  DateTime @default(now())
+  confidence   Float?
+  rawPayload   Json?
+  citationText String?
+
+  entityAliases    EntityAlias[]
+  entityRelations  EntityRelation[]
+  entityCategories EntityCategory[]
+
+  @@index([sourceId])
+  @@index([entityId])
+  @@index([externalId])
+}
+
+model ImportBatch {
+  id         String       @id @default(uuid())
+  sourceId   String
+  source     Source       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status     ImportStatus @default(PENDING)
+  startedAt  DateTime     @default(now())
+  finishedAt DateTime?
+  stats      Json?
+  errorLog   Json?
+
+  rawRecords RawImportRecord[]
+
+  @@index([sourceId])
+  @@index([status])
+}
+
+model RawImportRecord {
+  id            String          @id @default(uuid())
+  importBatchId String
+  importBatch   ImportBatch     @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  sourceId      String
+  source        Source          @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  externalId    String?
+  rawPayload    Json
+  checksum      String?
+  status        RawRecordStatus @default(PENDING)
+  normalizedAt  DateTime?
+
+  @@index([importBatchId])
+  @@index([sourceId])
+  @@index([externalId])
+  @@index([status])
+}
+
+model ReviewQueueItem {
+  id             String       @id @default(uuid())
+  type           ReviewType
+  status         ReviewStatus @default(PENDING)
+  priority       Int          @default(0) // Higher is more important
+  proposedAction String?
+  payload        Json
+  reason         String?
+  confidence     Float?
+  resolvedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([status])
+  @@index([type])
+  @@index([priority])
+}
+
+model YearProfile {
+  id                   String       @id @default(uuid())
+  year                 Int          @unique
+  themeName            String?
+  heroTitle            String?
+  heroSubtitle         String?
+  primaryEventEntityId String?
+  designTokens         Json?
+  editorialSummary     String?      @db.Text
+  status               EntityStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([year])
+  @@index([status])
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?    @db.Text
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  metadata    Json?
+
+  entities EntityCategory[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model EntityCategory {
+  id                String  @id @default(uuid())
+  entityId          String
+  categoryId        String
+  confidence        Float?
+  sourceReferenceId String?
+
+  entity          Entity           @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sourceReference SourceReference? @relation(fields: [sourceReferenceId], references: [id], onDelete: SetNull)
+
+  @@unique([entityId, categoryId])
+  @@index([entityId])
+  @@index([categoryId])
 }
