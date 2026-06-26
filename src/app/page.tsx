@@ -1,26 +1,43 @@
+import { TimelinePreview } from "@/components/shared/timeline-preview";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-background text-foreground transition-colors duration-300">
-      <div className="flex flex-col items-center text-center space-y-6">
-        {/* Placeholder Logo */}
-        <div className="w-24 h-24 bg-primary rounded-xl flex items-center justify-center shadow-2xl mb-4">
-          <span className="text-primary-foreground font-bold text-3xl tracking-tighter">TC</span>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem-4rem)] p-6 sm:p-24 animate-fade-in">
+      <div className="flex flex-col items-center text-center space-y-12 max-w-5xl mx-auto w-full">
         
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl mb-4">
-          TimeCapsule
-        </h1>
-        
-        <p className="text-xl text-muted-foreground max-w-2xl">
-          Explore Any Year. Relive Every Moment.
-        </p>
+        {/* Hero Section */}
+        <section className="space-y-6 animate-fade-in-up">
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl drop-shadow-sm">
+            TimeCapsule
+          </h1>
+          <p className="text-xl sm:text-2xl text-muted-foreground font-light max-w-2xl mx-auto text-balance">
+            Explore Any Year. Relive Every Moment.
+          </p>
+        </section>
 
-        {/* Minimal Navigation Placeholder */}
-        <nav className="mt-8 flex gap-6 text-sm font-medium">
-          <a href="#" className="hover:text-primary transition-colors">About</a>
-          <a href="#" className="hover:text-primary transition-colors">Explore</a>
-        </nav>
+        {/* Timeline Preview Component */}
+        <section className="w-full animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          <TimelinePreview />
+        </section>
+
+        {/* Coming Soon Message */}
+        <section className="w-full max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl dark:shadow-glow">
+            <CardContent className="p-8 space-y-4">
+              <h2 className="text-2xl font-semibold tracking-tight">Foundation Mode</h2>
+              <p className="text-sm text-muted-foreground text-balance">
+                We are currently building the digital memory of the world. Phase 2 layout foundation is active.
+              </p>
+              <div className="pt-4 flex justify-center">
+                <Button disabled className="w-full font-medium">Portal Closed</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+        
       </div>
-    </main>
+    </div>
   );
 }
