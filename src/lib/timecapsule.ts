@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, YearProfile } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -37,10 +37,7 @@ export async function getEntitiesForYear(year: number) {
   });
 }
 
-export async function getEntitiesByCategoryForYear(year: number) {
-  const entities = await getEntitiesForYear(year);
-
-  // Group by category name
+export function groupEntitiesByCategory(entities: any[]) {
   const grouped: Record<string, typeof entities> = {};
 
   for (const entity of entities) {
@@ -62,20 +59,35 @@ export async function getEntitiesByCategoryForYear(year: number) {
   return grouped;
 }
 
-export async function getFeaturedYearEntities(year: number) {
-  const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
-  const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
+export async function getYearHighlights(year: number) {
+  // Simplistic approach: pick up to 5 entities that have sources attached (proxy for importance in seed)
+  const all = await getEntitiesForYear(year);
+  return all.slice(0, 5);
+}
+
+export async function getYearPageData(year: number) {
+  const profile = await getYearProfile(year);
+  if (!profile) return null;
+
+  const rawEntities = await getEntitiesForYear(year);
+  const categories = groupEntitiesByCategory(rawEntities);
+  const highlights = await getYearHighlights(year);
+
+  return {
+    profile,
+    categories,
+    highlights,
+    entityCount: rawEntities.length
+  };
+}
+
+export function getPrimaryThemeTokens(profile: YearProfile | null) {
+  const defaultTokens = { primaryColor: "hsl(var(--primary))", secondaryColor: "hsl(var(--secondary))" };
+  if (!profile || !profile.designTokens) return defaultTokens;
   
-  return await prisma.entity.findMany({
-    where: {
-      startDate: {
-        gte: startOfYear,
-        lte: endOfYear,
-      },
-    },
-    take: 5,
-    orderBy: {
-      startDate: 'desc', // Just a simplistic featured logic for now
-    },
-  });
+  const tokens = profile.designTokens as Record<string, string>;
+  return {
+    primaryColor: tokens.primaryColor || defaultTokens.primaryColor,
+    secondaryColor: tokens.secondaryColor || defaultTokens.secondaryColor,
+  };
 }
