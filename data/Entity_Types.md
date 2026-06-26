@@ -1,0 +1,33 @@
+# Entity Types
+
+- `year`
+- `movie`
+- `series`
+- `anime`
+- `game`
+- `album`
+- `song`
+- `book`
+- `person`
+- `company`
+- `country`
+- `event`
+- `war`
+- `award`
+- `phone`
+- `car`
+- `software`
+- `website`
+- `operating_system`
+- `ai_model`
+- `console`
+- `space_mission`
+- `sports_event`
+- `technology`
+- `invention`
+- `food_product`
+- `toy`
+- `meme`
+- `law`
+- `election`
+- `natural_disaster`

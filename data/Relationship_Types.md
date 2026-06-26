@@ -1,0 +1,22 @@
+# Relationship Types
+
+- `released_in`
+- `created_by`
+- `directed_by`
+- `published_by`
+- `developed_by`
+- `won_award`
+- `nominated_for`
+- `born_in`
+- `died_in`
+- `occurred_in`
+- `located_in`
+- `member_of`
+- `succeeded_by`
+- `preceded_by`
+- `related_to`
+- `inspired_by`
+- `manufactured_by`
+- `founded_in`
+- `closed_in`
+- `launched_in`
