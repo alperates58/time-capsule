@@ -91,3 +91,56 @@ export function getPrimaryThemeTokens(profile: YearProfile | null) {
     secondaryColor: tokens.secondaryColor || defaultTokens.secondaryColor,
   };
 }
+
+export async function getEntityBySlug(slug: string) {
+  return await prisma.entity.findUnique({
+    where: { slug }
+  });
+}
+
+export async function getEntityRelations(entityId: string) {
+  // Fetch relations where this entity is either from or to
+  const fromRelations = await prisma.entityRelation.findMany({
+    where: { fromEntityId: entityId },
+    include: { toEntity: true, sourceReference: { include: { source: true } } }
+  });
+  
+  const toRelations = await prisma.entityRelation.findMany({
+    where: { toEntityId: entityId },
+    include: { fromEntity: true, sourceReference: { include: { source: true } } }
+  });
+
+  return { fromRelations, toRelations };
+}
+
+export async function getEntityCategories(entityId: string) {
+  return await prisma.entityCategory.findMany({
+    where: { entityId },
+    include: { category: true }
+  });
+}
+
+export async function getEntitySources(entityId: string) {
+  return await prisma.sourceReference.findMany({
+    where: { entityId },
+    include: { source: true }
+  });
+}
+
+export async function getEntityDetailPageData(slug: string) {
+  const entity = await getEntityBySlug(slug);
+  if (!entity) return null;
+
+  const [relations, categories, sources] = await Promise.all([
+    getEntityRelations(entity.id),
+    getEntityCategories(entity.id),
+    getEntitySources(entity.id)
+  ]);
+
+  return {
+    entity,
+    relations,
+    categories,
+    sources
+  };
+}
