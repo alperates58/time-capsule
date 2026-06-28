@@ -3,8 +3,9 @@ import type { NextRequest } from 'next/server';
 import { verifyAdminToken, ADMIN_COOKIE_NAME } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
-  // If accessing /admin, require auth
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  const pathname = request.nextUrl.pathname;
+  // If accessing /admin or /api/admin, require auth
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     // Exclude API routes within admin if any (currently none), or static assets
     
     // Add noindex header to all admin routes
@@ -20,6 +21,9 @@ export async function middleware(request: NextRequest) {
     const isValid = token ? await verifyAdminToken(token) : false;
 
     if (!isValid) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
       const loginUrl = new URL('/admin/login', request.url);
       const redirectResponse = NextResponse.redirect(loginUrl);
       redirectResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
@@ -33,5 +37,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };

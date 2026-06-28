@@ -23,9 +23,17 @@ export function ImportDashboard({ stats, batches, rawRecords, reviewItems }: Imp
       </div>
 
       {/* Header */}
-      <div className="mb-8 border-b border-white/10 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Import Review Dashboard</h1>
-        <p className="text-zinc-400">Monitor automated external integrations and resolve conflicts.</p>
+      <div className="mb-8 border-b border-white/10 pb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Import Review Dashboard</h1>
+          <p className="text-zinc-400">Monitor automated external integrations and resolve conflicts.</p>
+        </div>
+        <a 
+          href="/admin/imports/run" 
+          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          Run New Import
+        </a>
       </div>
 
       {/* KPI Cards */}
