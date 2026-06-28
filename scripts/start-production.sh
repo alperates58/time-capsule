@@ -10,7 +10,7 @@ fi
 
 echo "[TimeCapsule] 1/3: Pushing database schema..."
 # DO NOT use --accept-data-loss. If there is a destructive change, we want the container to crash loudly.
-npx prisma db push
+npx prisma db push --skip-generate
 
 echo "[TimeCapsule] 2/3: Seeding database (idempotent)..."
 npx tsx prisma/seed.ts
