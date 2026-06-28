@@ -8,6 +8,7 @@ import { EntityMetadata } from "@/components/entity/entity-metadata";
 import { EntityCategoryList } from "@/components/entity/entity-category-list";
 import { EntityRelationList } from "@/components/entity/entity-relation-list";
 import { EntitySourceNote } from "@/components/entity/entity-source-note";
+import { KnowledgeGraph } from "@/components/graph/knowledge-graph";
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,8 @@ export default async function EntityPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      <KnowledgeGraph slug={params.slug} />
     </div>
   );
 }
