@@ -7,8 +7,8 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-timecapsule}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-timecapsule}?schema=public
     depends_on:
       db:
         condition: service_healthy
@@ -16,17 +16,14 @@ services:
 
   db:
     image: postgres:15-alpine
-    # Do not expose ports to the host in production.
-    # ports:
-    #   - '5432:5432'
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER:-timecapsule}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me}
+      - POSTGRES_DB=${POSTGRES_DB:-timecapsule}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-timecapsule}"]
       interval: 5s
       timeout: 5s
       retries: 5
