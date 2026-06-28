@@ -35,19 +35,16 @@ Once the deployment indicator turns green, verify the following endpoints in you
 - `https://timecapsule.alperates.com.tr/api/health` -> Should return `{"status":"ok", "database":"connected", ...}`
 - `https://timecapsule.alperates.com.tr/admin/imports` -> Should load the dashboard. **WARNING: Do not expose this route publicly long term without adding Auth.**
 
-## 6. Database Initialization (Post-Deploy)
-Because we are using a brand new database volume, the schema must be pushed. Execute the following commands in the Coolify Terminal for the `web` container:
+## 6. Database Initialization (Fully Automated)
+Because we are using Docker Compose and the web container's custom startup script (`scripts/start-production.sh`), **no manual terminal intervention is required.**
 
-```bash
-# Push the Prisma schema to the database safely
-npx prisma db push
-
-# Seed initial categories and relations
-npm run prisma:seed
-```
+When the container boots:
+1. It safely pushes the Prisma schema to the database (`npx prisma db push`). It will purposefully crash and refuse to start if it detects a destructive data-loss change.
+2. It idempotently seeds the core data structures and 1998 samples.
+3. It launches the Next.js production server.
 
 **WARNING**: 
-- **DO NOT** run bulk imports without a dry-run first.
+- **DO NOT** run bulk imports without a dry-run first via the CLI.
 - Always test imports with: `npx tsx scripts/import-years.ts --year 1998 --types films --limit 5 --dry-run`
 
 ## 7. Redeploy Behavior
