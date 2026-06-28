@@ -1,6 +1,5 @@
-import { PrismaClient, YearProfile } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { YearProfile } from '@prisma/client';
+import prisma from './prisma';
 
 export async function getYearProfile(year: number) {
   return await prisma.yearProfile.findUnique({

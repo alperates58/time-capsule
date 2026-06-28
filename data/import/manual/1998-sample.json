@@ -1,0 +1,44 @@
+{
+  "categories": [
+    { "slug": "software-1998", "name": "1998 Software Releases" },
+    { "slug": "hardware-1998", "name": "1998 Hardware Releases" }
+  ],
+  "entities": [
+    {
+      "slug": "windows-98",
+      "type": "OS",
+      "title": "Windows 98",
+      "description": "An operating system released by Microsoft in 1998 as the successor to Windows 95.",
+      "startDate": "1998-06-25T00:00:00Z",
+      "precision": "EXACT"
+    },
+    {
+      "slug": "imac-g3",
+      "type": "OTHER",
+      "title": "iMac G3",
+      "description": "A series of personal computers designed, manufactured, and sold by Apple Computer, Inc.",
+      "startDate": "1998-08-15T00:00:00Z",
+      "precision": "EXACT"
+    },
+    {
+      "slug": "starcraft",
+      "type": "GAME",
+      "title": "StarCraft",
+      "description": "A military science fiction real-time strategy video game developed and published by Blizzard Entertainment.",
+      "startDate": "1998-03-31T00:00:00Z",
+      "precision": "EXACT"
+    }
+  ],
+  "entityCategories": [
+    { "entitySlug": "windows-98", "categorySlug": "software-1998" },
+    { "entitySlug": "imac-g3", "categorySlug": "hardware-1998" },
+    { "entitySlug": "starcraft", "categorySlug": "software-1998" }
+  ],
+  "relations": [
+    {
+      "fromSlug": "starcraft",
+      "toSlug": "windows-98",
+      "relationType": "COMPATIBLE_WITH"
+    }
+  ]
+}

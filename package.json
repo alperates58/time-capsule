@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "prisma:generate": "prisma generate",
     "prepare": "husky install",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "import:manual": "tsx scripts/import-manual.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.12.0",
