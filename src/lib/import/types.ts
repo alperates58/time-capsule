@@ -11,6 +11,8 @@ export interface NormalizedEntity {
   precision?: DatePrecision;
   metadata?: Record<string, any>;
   aliases?: string[];
+  externalId?: string;
+  sourceUrl?: string;
 }
 
 export interface NormalizedRelation {
@@ -19,6 +21,8 @@ export interface NormalizedRelation {
   relationType: RelationType;
   startDate?: string;
   endDate?: string;
+  externalId?: string;
+  sourceUrl?: string;
 }
 
 export interface NormalizedCategory {

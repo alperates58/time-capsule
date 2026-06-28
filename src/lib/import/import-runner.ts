@@ -54,9 +54,27 @@ export async function runManualImport(sourceName: string, payload: ImportPayload
                 endDate: ent.endDate ? new Date(ent.endDate) : existing.endDate,
               }
             });
+            
+            if (ent.externalId) {
+              const existingRef = await prisma.sourceReference.findFirst({
+                where: { entityId: existing.id, externalId: ent.externalId, sourceId: batch.sourceId }
+              });
+              if (!existingRef) {
+                await prisma.sourceReference.create({
+                  data: {
+                    sourceId: batch.sourceId,
+                    entityId: existing.id,
+                    externalId: ent.externalId,
+                    url: ent.sourceUrl,
+                    rawPayload: ent as any,
+                    confidence: 100
+                  }
+                });
+              }
+            }
           } else {
             // Create new
-            await prisma.entity.create({
+            const newEnt = await prisma.entity.create({
               data: {
                 slug: ent.slug,
                 type: ent.type,
@@ -68,6 +86,19 @@ export async function runManualImport(sourceName: string, payload: ImportPayload
                 precision: ent.precision,
               }
             });
+            
+            if (ent.externalId) {
+              await prisma.sourceReference.create({
+                data: {
+                  sourceId: batch.sourceId,
+                  entityId: newEnt.id,
+                  externalId: ent.externalId,
+                  url: ent.sourceUrl,
+                  rawPayload: ent as any,
+                  confidence: 100
+                }
+              });
+            }
             importedEntities++;
           }
           await logRawRecord(batch.id, batch.sourceId, ent, RawRecordStatus.PROCESSED);
