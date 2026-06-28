@@ -5,7 +5,7 @@ import { runManualImport } from "../../import-runner";
 import { ImportPayload, NormalizedEntity } from "../../types";
 import { EntityType } from "@prisma/client";
 
-export async function importFromWikidata(year: number, type: string, limit: number) {
+export async function importFromWikidata(year: number, type: string, limit: number, dryRun: boolean = false) {
   let query = "";
   let targetType: EntityType = EntityType.OTHER;
 
@@ -50,12 +50,17 @@ export async function importFromWikidata(year: number, type: string, limit: numb
     
     if (entities.length === 0) {
       console.log("No valid entities to import.");
-      return;
+      return { success: true, importedEntities: 0, skipped: bindings.length, errors: [] };
     }
 
     const payload: ImportPayload = {
       entities
     };
+
+    if (dryRun) {
+      console.log(`[DRY-RUN] Would have routed ${entities.length} entities to Import Engine. Database untouched.`);
+      return { success: true, importedEntities: entities.length, skipped: bindings.length - entities.length, errors: [] };
+    }
 
     console.log("Routing through TimeCapsule Import Engine...");
     const result = await runManualImport("WIKIDATA", payload);
@@ -66,8 +71,16 @@ export async function importFromWikidata(year: number, type: string, limit: numb
       console.log("Errors:");
       console.log(result.errors);
     }
+
+    return {
+      success: result.success,
+      importedEntities: result.importedEntities,
+      skipped: bindings.length - entities.length,
+      errors: result.errors
+    };
     
   } catch (err: any) {
     console.error("Wikidata Import Failed:", err.message);
+    return { success: false, importedEntities: 0, skipped: 0, errors: [err.message] };
   }
 }
