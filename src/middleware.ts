@@ -8,14 +8,14 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     // Exclude API routes within admin if any (currently none), or static assets
     
+    // Exclude /admin/login from protection
+    if (request.nextUrl.pathname === '/admin/login') {
+      return NextResponse.next();
+    }
+
     // Add noindex header to all admin routes
     const response = NextResponse.next();
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
-
-    // Exclude /admin/login from protection
-    if (request.nextUrl.pathname === '/admin/login') {
-      return response;
-    }
 
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
     const isValid = token ? await verifyAdminToken(token) : false;
