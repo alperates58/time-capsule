@@ -1,4 +1,4 @@
-import { importFromWikidata } from "../src/lib/import/sources/wikidata/wikidata-importer";
+import { ProviderRegistry } from "../src/lib/import/providers/provider-registry";
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
@@ -100,7 +100,17 @@ async function runBulkImport() {
     console.log(`\n[Job ${i + 1}/${queue.length}] Processing ${job.type} for year ${job.year}...`);
     
     try {
-      const result = await importFromWikidata(job.year, job.type, limit, dryRun);
+      const providers = ProviderRegistry.getProvidersForType(job.type);
+      if (providers.length === 0) {
+        console.warn(`No provider found supporting type: ${job.type}. Skipping.`);
+        stats.processed++;
+        stats.failed++;
+        continue;
+      }
+      
+      // For now, use the first provider that supports the type
+      const provider = providers[0];
+      const result = await provider.fetch(job.year, job.type, limit, dryRun);
       
       stats.processed++;
       if (result && result.success) {

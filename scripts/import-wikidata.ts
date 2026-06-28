@@ -1,4 +1,4 @@
-import { importFromWikidata } from '../src/lib/import/sources/wikidata/wikidata-importer';
+import { ProviderRegistry } from '../src/lib/import/providers/provider-registry';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -30,7 +30,8 @@ async function main() {
   console.log(` Limit:  ${limit} records max`);
   console.log("==========================================\n");
 
-  await importFromWikidata(year, type, limit);
+  const provider = ProviderRegistry.getProvider("WIKIDATA");
+  await provider.fetch(year, type, limit, false);
 }
 
 main().catch(err => {
