@@ -10,7 +10,7 @@ TimeCapsule is fully prepared to be deployed as a single application stack via D
 
 ## 2. Environment Variables
 In the Coolify project settings under "Environment Variables", configure the following keys:
-- `NODE_ENV=production`
+- `NODE_ENV=production` *(Ensure this is set to **Runtime Only**, NOT "Build time", to avoid stripping devDependencies during the build stage).*
 - `NEXT_PUBLIC_SITE_URL=https://timecapsule.alperates.com.tr`
 - `POSTGRES_USER=timecapsule_admin` *(Set to a secure username)*
 - `POSTGRES_PASSWORD=your_secure_password_here` *(Set to a strong password)*

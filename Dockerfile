@@ -1,5 +1,5 @@
 FROM node:20-bookworm-slim AS base
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl git
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -8,6 +8,7 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
+RUN node -v && npm -v
 RUN npm ci
 
 # Rebuild the source code only when needed
